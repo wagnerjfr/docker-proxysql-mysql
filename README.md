@@ -112,7 +112,7 @@ mysql: [Warning] Using a password on the command line interface can be insecure.
 +--------------------+----------+--------------+------------------+------------------------------------------+
 ```
 
-Let’s continue with the **slave nodes**.
+Let’s configure the **slave nodes** by setting the master and executing the `START SLAVE;` command.
 ```
 for N in 1 2
   do docker exec -it slave$N mysql -uroot -pmypass \
@@ -128,7 +128,7 @@ done
 ```
 $ docker exec -it slave1 mysql -uroot -pmypass -e "SHOW SLAVE STATUS\G"
 ```
-Slave1 output:
+Output:
 ```console
 *************************** 1. row ***************************
                Slave_IO_State: Waiting for master to send event
@@ -151,7 +151,7 @@ Slave1 output:
 ```
 docker exec -it slave2 mysql -uroot -pmypass -e "SHOW SLAVE STATUS\G"
 ```
-Slave2 output:
+Output:
 ```console
 *************************** 1. row ***************************
                Slave_IO_State: Waiting for master to send event
@@ -226,7 +226,8 @@ Output:
 
 * Option 2:
 ```
-$ docker exec -i master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin --prompt "ProxySQL Admin> " <<< "select * from mysql_servers;"'
+$ docker exec -i master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin \
+   --prompt "ProxySQL Admin> " <<< "select * from mysql_servers;"'
 ```
 Output:
 ```console
