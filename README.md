@@ -44,7 +44,7 @@ mysql_users =
 ### 1. Creating a Docker network
 Fire the following command to create a network:
 ```
-docker network create replicanet
+$ docker network create replicanet
 ```
 
 ### 2. Creating 3 MySQL containers
@@ -83,15 +83,33 @@ do docker run -d --rm --name=slave$N --net=replicanet --hostname=slave$N \
   --read_only=TRUE
 done
 ```
+Check whether the MySQL container are in `healthy` status before continuing by running `docker ps -a`:
+```
+$ docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                    PORTS                 NAMES
+658f6f0a0add        mysql:5.7.26        "docker-entrypoint.s…"   40 seconds ago      Up 37 seconds (healthy)   3306/tcp, 33060/tcp   slave2
+3d1b84470531        mysql:5.7.26        "docker-entrypoint.s…"   42 seconds ago      Up 40 seconds (healthy)   3306/tcp, 33060/tcp   slave1
+3207c898da29        mysql:5.7.26        "docker-entrypoint.s…"   54 seconds ago      Up 52 seconds (healthy)   3306/tcp, 33060/tcp   master
+```
 
-### 3. Configuring replication amonng master and slaves
+
+### 3. Configuring master slaves replication
 
 Let's configure the **master node**.
 ```
-docker exec -it master mysql -uroot -pmypass \
+$ docker exec -it master mysql -uroot -pmypass \
   -e "CREATE USER 'repl'@'%' IDENTIFIED BY 'slavepass';" \
   -e "GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';" \
   -e "SHOW MASTER STATUS;"
+```
+Master's output:
+```console
+mysql: [Warning] Using a password on the command line interface can be insecure.
++--------------------+----------+--------------+------------------+------------------------------------------+
+| File               | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set                        |
++--------------------+----------+--------------+------------------+------------------------------------------+
+| mysql-bin-1.000003 |      635 |              |                  | 5ae030a1-864c-11e9-810e-0242ac150002:1-7 |
++--------------------+----------+--------------+------------------+------------------------------------------+
 ```
 
 Let’s continue with the **slave nodes**.
@@ -108,7 +126,7 @@ done
 ### 4. Checking slaves replication status
 * Slave1:
 ```
-docker exec -it slave1 mysql -uroot -pmypass -e "SHOW SLAVE STATUS\G"
+$ docker exec -it slave1 mysql -uroot -pmypass -e "SHOW SLAVE STATUS\G"
 ```
 Slave1 output:
 ```console
@@ -151,19 +169,69 @@ Slave2 output:
                              ...
 ```
 
-### 5. Granting access to proxySQL in MySQL and launching ProxySQL
+### 5. Granting access to proxySQL in MySQL and launching ProxySQL container
 
 Run the command below to grant access to `monitor` user:
 ```
-docker exec -it master mysql -uroot -pmypass \
--e "CREATE USER 'monitor'@'%' IDENTIFIED BY 'monitor';" \
--e "GRANT ALL PRIVILEGES on *.* TO 'monitor'@'%';" \
--e "FLUSH PRIVILEGES;"
+$ docker exec -it master mysql -uroot -pmypass \
+  -e "CREATE USER 'monitor'@'%' IDENTIFIED BY 'monitor';" \
+  -e "GRANT ALL PRIVILEGES on *.* TO 'monitor'@'%';" \
+  -e "FLUSH PRIVILEGES;"
 ```
 
-Execute the command to laucnh the proxySQL container:
+To run a ProxySQL container with the ProxySQL configuration file:
 ```
-docker run -d --rm -p 16032:6032 -p 16033:6033 \
+$ docker run -d --rm -p 16032:6032 -p 16033:6033 \
   --name=proxysql --net=replicanet \
   -v $PWD/proxysql.cnf:/etc/proxysql.cnf proxysql/proxysql
+```
+
+#### 6. Connecting to ProxySQL admin interface
+
+* Option 1:
+```
+$ docker exec -it master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin --prompt "ProxySQL Admin> "'
+```
+```console
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 6
+Server version: 5.5.30 (ProxySQL Admin Module)
+
+Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+ProxySQL Admin> 
+```
+The you can execute, for example:
+```
+ProxySQL Admin> select * from mysql_servers;
+```
+Output:
+```console
++--------------+----------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| hostgroup_id | hostname | port | gtid_port | status | weight | compression | max_connections | max_replication_lag | use_ssl | max_latency_ms | comment |
++--------------+----------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+| 10           | master   | 3306 | 0         | ONLINE | 1      | 0           | 100             | 5                   | 0       | 0              |         |
+| 20           | slave1   | 3306 | 0         | ONLINE | 1      | 0           | 100             | 5                   | 0       | 0              |         |
+| 20           | slave2   | 3306 | 0         | ONLINE | 1      | 0           | 100             | 5                   | 0       | 0              |         |
++--------------+----------+------+-----------+--------+--------+-------------+-----------------+---------------------+---------+----------------+---------+
+3 rows in set (0.00 sec)
+```
+
+* Option 2:
+```
+$ docker exec -i master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin --prompt "ProxySQL Admin> " <<< "select * from mysql_servers;"'
+```
+Output:
+```console
+hostgroup_id	hostname	port	gtid_port	status	weight	compression	max_connections	max_replication_lag	use_ssl	max_latency_ms	comment
+10	master	3306	0	ONLINE	1	0	100	5	0	0	
+20	slave1	3306	0	ONLINE	1	0	100	5	0	0	
+20	slave2	3306	0	ONLINE	1	0	100	5	0	0	
 ```
