@@ -1,10 +1,10 @@
 # Using Docker containers to setup ProxySQL + MySQL Replication
 
-**ProxySQL** is an open-source MySQL proxy server, meaning it serves as an intermediary between a MySQL server and the applications that access its databases. ProxySQL can improve performance by distributing traffic among a pool of multiple database servers and also improve availability by automatically failing over to a standby if one or more of the database servers fail.
+**ProxySQL** (https://proxysql.com/) is an open-source MySQL proxy server, meaning it serves as an intermediary between a MySQL server and the applications that access its databases. ProxySQL can improve performance by distributing traffic among a pool of multiple database servers and also improve availability by automatically failing over to a standby if one or more of the database servers fail.
 
 ## ProxySQL config file
 
-Let's see the main definitions we have in proxysql.cnf config file
+Let's see the main definitions we have in `proxysql.cnf` config file
 
 Defines the proxySQL admin credentials and port to access `6032`.
 ```
