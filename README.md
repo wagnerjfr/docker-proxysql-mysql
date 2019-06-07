@@ -188,7 +188,7 @@ $ docker run -d --rm -p 16032:6032 -p 16033:6033 \
 
 #### 6. Connecting to ProxySQL admin interface
 
-* Option 1:
+##### Option 1:
 ```
 $ docker exec -it master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin --prompt "ProxySQL Admin> "'
 ```
@@ -224,7 +224,7 @@ Output:
 3 rows in set (0.00 sec)
 ```
 
-* Option 2:
+##### Option 2:
 ```
 $ docker exec -i master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin \
    --prompt "ProxySQL Admin> " <<< "select * from mysql_servers;"'
@@ -235,4 +235,51 @@ hostgroup_id	hostname	port	gtid_port	status	weight	compression	max_connections	m
 10	master	3306	0	ONLINE	1	0	100	5	0	0	
 20	slave1	3306	0	ONLINE	1	0	100	5	0	0	
 20	slave2	3306	0	ONLINE	1	0	100	5	0	0	
+```
+#### 7. Adding data and querying
+
+ProxySQL container doesn't have mysql installed, so we need to access it using one of the running MySQL containers, like:
+```
+$ docker exec -i master bash -c 'mysql -hproxysql -P6033 -uroot -pmypass -e "SELECT @@port"'
+```
+Output:
+```console
+@@port
+3306
+```
+So, let's create a table:
+```
+$ docker exec -i master bash -c 'mysql -hproxysql -P6033 -uroot -pmypass \
+  -e "create database TEST; use TEST; CREATE TABLE t1 (id INT NOT NULL PRIMARY KEY) ENGINE=InnoDB; show tables;"'
+```
+Adding some data:
+```
+$ docker exec -i master bash -c 'mysql -hproxysql -P6033 -uroot -pmypass \
+  -e "INSERT INTO TEST.t1 VALUES(1); INSERT INTO TEST.t1 VALUES(2); INSERT INTO TEST.t1 VALUES(3);"'
+```
+Run the select to check the data inserted:
+```
+$ docker exec -i master bash -c 'mysql -hproxysql -P6033 -uroot -pmypass \
+  -e "SELECT * FROM TEST.t1;"'
+```
+Output:
+```console
+mysql: [Warning] Using a password on the command line interface can be insecure.
+id
+1
+2
+3
+```
+#### 8. Stopping containers, removing created network and image
+Stopping running container(s):
+```
+$ docker stop master slave1 slave2 proxysql
+```
+Removing the created network:
+```
+$ docker network rm replicanet
+```
+Removing MySQL image:
+```
+$ docker rmi mysql:5.7.26
 ```
