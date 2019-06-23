@@ -186,9 +186,9 @@ $ docker run -d --rm -p 16032:6032 -p 16033:6033 \
   -v $PWD/proxysql.cnf:/etc/proxysql.cnf proxysql/proxysql
 ```
 
-#### 6. Connecting to ProxySQL admin interface
+### 6. Connecting to ProxySQL admin interface
 
-##### Option 1:
+#### Option 1:
 ```
 $ docker exec -it master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin --prompt "ProxySQL Admin> "'
 ```
@@ -224,7 +224,7 @@ Output:
 3 rows in set (0.00 sec)
 ```
 
-##### Option 2:
+#### Option 2:
 ```
 $ docker exec -i master bash -c 'mysql -hproxysql -P6032 -uradmin -pradmin \
    --prompt "ProxySQL Admin> " <<< "select * from mysql_servers;"'
@@ -236,7 +236,7 @@ hostgroup_id	hostname	port	gtid_port	status	weight	compression	max_connections	m
 20	slave1	3306	0	ONLINE	1	0	100	5	0	0	
 20	slave2	3306	0	ONLINE	1	0	100	5	0	0	
 ```
-#### 7. Adding data and querying
+### 7. Adding data and querying
 
 ProxySQL container doesn't have mysql installed, so we need to access it using one of the running MySQL containers, like:
 ```
@@ -270,7 +270,7 @@ id
 2
 3
 ```
-#### 8. Stopping containers, removing created network and image
+### 8. Stopping containers, removing created network and image
 Stopping running container(s):
 ```
 $ docker stop master slave1 slave2 proxysql
