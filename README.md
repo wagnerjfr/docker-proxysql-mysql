@@ -4,9 +4,9 @@
 
 ## ProxySQL config file
 
-Let's see the main definitions we have in `proxysql.cnf` config file
+Let's see the main definitions we have in `proxysql.cnf` config file:
 
-Defines the proxySQL admin credentials and port to access `6032`.
+* the proxySQL admin credentials and port to access `6032`.
 ```
 admin_variables=
 {
@@ -16,7 +16,7 @@ admin_variables=
 }
 ```
 
-Defines the hostgroups and the role of which MySQL server.
+* the hostgroups and the role of which MySQL server.
 ```
 mysql_replication_hostgroups =
 (
@@ -31,7 +31,7 @@ mysql_servers =
 )
 ```
 
-MySQL user:
+* MySQL user:
 ```
 mysql_users =
 (
@@ -84,7 +84,7 @@ do docker run -d --rm --name=slave$N --net=replicanet --hostname=slave$N \
 done
 ```
 Check whether the MySQL container are in `healthy` status before continuing by running `docker ps -a`:
-```
+```console
 $ docker ps -a
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                    PORTS                 NAMES
 658f6f0a0add        mysql:5.7.26        "docker-entrypoint.s…"   40 seconds ago      Up 37 seconds (healthy)   3306/tcp, 33060/tcp   slave2
@@ -112,7 +112,7 @@ mysql: [Warning] Using a password on the command line interface can be insecure.
 +--------------------+----------+--------------+------------------+------------------------------------------+
 ```
 
-Let’s configure the **slave nodes** by setting the master and executing the `START SLAVE;` command.
+Let’s configure the **slave nodes** by setting up the master and executing the `START SLAVE;` command.
 ```
 for N in 1 2
   do docker exec -it slave$N mysql -uroot -pmypass \
