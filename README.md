@@ -42,7 +42,7 @@ mysql_users =
 ## Steps
 
 ### 1. Creating a Docker network
-Fire the following command to create a network:
+Run the following command to create a network:
 ```
 $ docker network create replicanet
 ```
