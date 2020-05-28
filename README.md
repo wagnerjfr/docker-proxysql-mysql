@@ -6,7 +6,7 @@
 
 Let's see the main definitions we have in `proxysql.cnf` config file:
 
-* the proxySQL admin credentials and port to access `6032`.
+* the proxySQL *admin credentials* and *port* to access `6032`.
 ```
 admin_variables=
 {
@@ -16,7 +16,7 @@ admin_variables=
 }
 ```
 
-* the hostgroups and the role of which MySQL server.
+* the *hostgroups* and the *role* of which MySQL server.
 ```
 mysql_replication_hostgroups =
 (
