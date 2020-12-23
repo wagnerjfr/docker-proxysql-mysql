@@ -41,13 +41,13 @@ mysql_users =
 
 ## Steps
 
-### 1. Creating a Docker network
+### 1. To create a Docker network
 Run the following command to create a network:
 ```
 $ docker network create replicanet
 ```
 
-### 2. Creating 3 MySQL containers
+### 2. To create 3 MySQL containers
 
 **One master**
 ```
@@ -93,7 +93,7 @@ CONTAINER ID        IMAGE               COMMAND                  CREATED        
 ```
 
 
-### 3. Configuring master slaves replication
+### 3. To configure master slaves replication
 
 Let's configure the **master node**.
 ```
