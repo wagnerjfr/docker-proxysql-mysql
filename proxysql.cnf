@@ -38,9 +38,9 @@ mysql_replication_hostgroups =
 
 mysql_servers =
 (
-    { address="master" , port=3306 , hostgroup=10, max_connections=100 , max_replication_lag = 5 },
-    { address="slave1" , port=3306 , hostgroup=20, max_connections=100 , max_replication_lag = 5 },
-    { address="slave2" , port=3306 , hostgroup=20, max_connections=100 , max_replication_lag = 5 }
+    { address="source" , port=3306 , hostgroup=10, max_connections=100 , max_replication_lag = 5 },
+    { address="replica1" , port=3306 , hostgroup=20, max_connections=100 , max_replication_lag = 5 },
+    { address="replica2" , port=3306 , hostgroup=20, max_connections=100 , max_replication_lag = 5 }
 )
 
 mysql_query_rules =
